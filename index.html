@@ -5,251 +5,53 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>YOYO 羽球隊 - T恤客製化預覽系統</title>
-    <style>
-        :root {
-            --shirt-color: #4A4E51; /* 預設 003 深灰色 */
-            --logo-color: #FFFFFF;  /* 預設白色圖案 */
-        }
+<style>
+    /* 修正容器邊界問題的核心 */
+    * { box-sizing: border-box; } /* 確保所有寬度計算包含邊框，防止撐開 */
 
-        body {
-            font-family: "Helvetica Neue", Helvetica, Arial, "Microsoft JhengHei", sans-serif;
-            background-color: #f0f2f5;
-            margin: 0;
-            padding: 20px 10px; /* 手機端兩側留白縮小 */
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
+    body {
+        font-family: "Helvetica Neue", Helvetica, Arial, "Microsoft JhengHei", sans-serif;
+        background-color: #f0f2f5;
+        margin: 0;
+        padding: 0; /* 改為 0，改由內部容器控制間距 */
+        width: 100vw; /* 強制寬度等於視窗寬度 */
+        overflow-x: hidden; /* 防止內容向右溢出導致左邊被切 */
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
 
-        h1 { 
-            color: #333; 
-            margin-bottom: 5px; 
-            font-size: 24px; /* 手機端標題微調 */
-            text-align: center;
-        }
-        .status-bar { 
-            font-size: 15px; 
-            color: #555; 
-            margin-bottom: 20px; 
-            font-weight: bold; 
-            text-align: center;
-        }
+    .main-container {
+        display: flex;
+        flex-direction: row;
+        gap: 15px;
+        max-width: 100%; /* 確保最大寬度不超過螢幕 */
+        width: 100%;
+        padding: 10px;   /* 提供內距，確保內容不會頂到螢幕邊緣 */
+        justify-content: center;
+        flex-wrap: wrap;
+    }
 
-        /* 🌍 主容器修正：寬度改為百分比，並允許內容往下掉 */
-        .main-container {
-            display: flex;
-            flex-direction: row;
-            gap: 20px;
-            max-width: 1200px;
-            width: 100%;
-            justify-content: center;
-            flex-wrap: wrap; /* 關鍵：寬度不夠時自動換行 */
-            box-sizing: border-box;
-        }
+    /* 確保畫布不會超出父容器 */
+    .shirt-canvas {
+        position: relative;
+        width: 100%;
+        max-width: 340px;
+        margin: 0 auto; /* 自動置中 */
+        aspect-ratio: 340 / 380;
+        background-color: #ebeff2;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        overflow: visible; 
+    }
 
-        /* 🖼️ 預覽區域修正：寬度自適應 */
-        .preview-area {
-            display: flex;
-            gap: 20px;
-            background: #fff;
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-            flex: 1;
-            min-width: 320px; /* 確保在小螢幕不會無限縮小 */
-            justify-content: center;
-            flex-wrap: wrap; /* 正反面在手機上自動改成上下排列 */
-            box-sizing: border-box;
-        }
-
-        .shirt-view {
-            text-align: center;
-            flex: 1;
-            min-width: 280px; /* 正反面獨立基底寬度 */
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        .shirt-view h3 {
-            margin-top: 12px;
-            color: #555;
-            font-size: 15px;
-            margin-bottom: 10px;
-        }
-
-        /* 👕 畫布容器修正：改為彈性 max-width，寬度不綁死 */
-        .shirt-canvas {
-            position: relative;
-            width: 100%;
-            max-width: 340px; /* 電腦上維持原尺寸 */
-            aspect-ratio: 340 / 380; /* 固定完美黃金比例 */
-            background-color: #ebeff2;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            overflow: hidden;
-        }
-
-        .shirt-vector {
-            width: 100%;
-            height: 100%;
-        }
-
-        .shirt-part-fill {
-            fill: var(--shirt-color) !important;
-            transition: fill 0.3s ease;
-        }
-        .shirt-part-stroke {
-            stroke: var(--shirt-color) !important;
-            transition: stroke 0.3s ease;
-        }
-
-        /* LOGO 疊加層（保持比例縮放） */
-        .logo-layer {
-            position: absolute;
-            pointer-events: none;
-            width: 100%;
-            height: 100%;
-            top: 0;
-            left: 0;
-        }
-
-        /* 正面 LOGO 放置於右胸處且放大 */
-        .front-logo {
-            transform: translate(180px, 75px) scale(0.25);
-            transform-origin: top center;
-        }
-
-        /* 背面 LOGO 置中且放大 */
-        .back-logo {
-            left: 50%;
-            transform: translate(-50%, 85px) scale(0.6);
-            transform-origin: top center;
-        }
-
-        /* 🎛️ 控制面板修正：寬度改為自適應 */
-        .control-panel {
-            background: #fff;
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-            width: 100%;
-            max-width: 450px; /* 電腦上維持原樣 */
-            box-sizing: border-box;
-            flex: 1;
-            min-width: 320px;
-        }
-
-        .section-title {
-            font-size: 16px;
-            font-weight: bold;
-            margin-bottom: 15px;
-            border-left: 4px solid #005BAA;
-            padding-left: 10px;
-            color: #111;
-        }
-
-        .toggle-container {
-            display: flex;
-            gap: 12px;
-            margin-bottom: 25px;
-        }
-
-        .btn-toggle {
-            flex: 1;
-            padding: 12px;
-            border: 2px solid #ddd;
-            background: #fff;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: bold;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            transition: all 0.2s;
-            font-size: 14px;
-        }
-
-        .btn-toggle.active {
-            background: #f0f7ff;
-            color: #005BAA;
-            border-color: #005BAA;
-        }
-
-        .color-dot { width: 14px; height: 14px; border-radius: 50%; border: 1px solid #ccc; }
-
-        /* 🎨 40色衣服網格修正：改用自適應最小寬度，手機上一排自動變4列或3列，不擠壓 */
-        .color-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(55px, 1fr));
-            gap: 10px;
-            max-height: 320px;
-            overflow-y: auto;
-            padding-right: 5px;
-            margin-bottom: 20px;
-        }
-
-        .color-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            cursor: pointer;
-            border: 2px solid transparent;
-            padding: 4px;
-            border-radius: 8px;
-            transition: all 0.2s;
-        }
-
-        .color-item:hover { background-color: #f0f0f0; }
-        .color-item.active { border-color: #005BAA; background-color: #f0f7ff; }
-
-        .color-swatch {
-            width: 100%;
-            aspect-ratio: 1 / 1; /* 保持正方形 */
-            border-radius: 6px;
-            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
-            border: 1px solid rgba(0,0,0,0.1);
-        }
-
-        .color-name {
-            font-size: 11px;
-            margin-top: 5px;
-            text-align: center;
-            color: #444;
-            line-height: 1.2;
-        }
-
-        /* 📐 尺寸表滾動條修正：手機寬度不夠時允許橫向滑動，不撐破網頁 */
-        .table-responsive {
-            width: 100%;
-            overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
-            margin-bottom: 10px;
-        }
-
-        .size-table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 13px;
-            text-align: center;
-            min-width: 400px; /* 確保表格字體不縮小變形 */
-        }
-        .size-table th, .size-table td { border: 1px solid #eee; padding: 8px 4px; }
-        .size-table th { background: #f8f9fa; color: #555; font-weight: bold; }
-
-        /* 綁定變色專用 Class */
-        .logo-part-fill { fill: var(--logo-color) !important; transition: fill 0.2s; }
-        .logo-part-stroke { stroke: var(--logo-color) !important; transition: stroke 0.2s; }
-
-        /* 📱 針對極小螢幕手機的細節微調 (Media Queries) */
-        @media (max-width: 480px) {
-            body { padding: 10px 5px; }
-            h1 { font-size: 20px; }
-            .preview-area { padding: 10px; gap: 15px; }
-            .control-panel { padding: 15px; }
-        }
-    </style>
+    /* 調整手機端顯示縮放比例 */
+    @media (max-width: 480px) {
+        .main-container { padding: 5px; }
+        .preview-area { padding: 5px; }
+        h1 { font-size: 18px; padding: 10px; }
+    }
+</style>
 </head>
 <body>
 
