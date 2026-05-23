@@ -35,17 +35,20 @@
             flex-wrap: wrap;
         }
 
-        /* 預覽區域 */
+       /* 預覽區域 */
         .preview-section {
             display: flex;
-            gap: 25px;
+            gap: 15px; /* 將間距稍微縮小 */
             background: #fff;
-            padding: 30px;
+            padding: 15px; /* 縮小內距，讓空間變多 */
             border-radius: 15px;
             box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-            flex: 1;
-            min-width: 650px;
+            width: 100%;       /* 改為 100% 寬度 */
+            max-width: 600px;  /* 限制最大寬度，電腦上不會太寬 */
+            min-width: unset;  /* 取消原本強制規定的 650px 限制 */
             justify-content: space-around;
+            flex-wrap: wrap;   /* 關鍵：讓正反面在太窄時自動變成上下排列 */
+            margin: 0 auto;    /* 居中 */
         }
 
         .shirt-view { text-align: center; }
